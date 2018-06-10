@@ -14,9 +14,10 @@ device_folder = device_folders[0]
 device_file = device_folder + '/w1_slave'
 
 id_map= {'28-041720c81bff':'freezer','28-031720194eff':'refrigerator'}
+sensor_map= {'freezer':'28-041720c81bff','refrigerator':'28-031720194eff'}
 
-filename = "tempMonitor.csv"
-fieldnames = ['time','id','sensor','value']
+filename = "tempDB.csv"
+fieldnames = ['time','freezer','refrigerator']
 
 def gen_path(id):
     #print(os.path.join(base_dir,id))
@@ -48,17 +49,27 @@ with open(filename,'ab') as csvfile:
     writer = csv.DictWriter(csvfile,fieldnames=fieldnames)
 
     while True:
-        for device_path in device_folders:
-            device_id = os.path.basename(device_path)
-            
-            result = {'time':gen_timestamp(),
-                    'id':device_id,
-                    'sensor':id_map.get(device_id),
-                    'value':read_temp(device_id)[1]}
-            #print(gen_timestamp(),device_id,id_map.get(device_id),read_temp(device_id)[1])	
-            #print(result)
-            writer.writerow(result)
-            csvfile.flush()
+        result = {'time':gen_timestamp()}
+        for sensor,sensor_id in sensor_map.items():
+#            print("Reading ",sensor,sensor_id)
+            result[sensor] = read_temp(sensor_id)[1]
+        writer.writerow(result)
+        csvfile.flush()
+
+
+
+
+#        for device_path in device_folders:
+#            device_id = os.path.basename(device_path)
+#            
+#            result = {'time':gen_timestamp(),
+#                    'id':device_id,
+#                    'sensor':id_map.get(device_id),
+#                    'value':read_temp(device_id)[1]}
+#            #print(gen_timestamp(),device_id,id_map.get(device_id),read_temp(device_id)[1])	
+#            #print(result)
+#            writer.writerow(result)
+#            csvfile.flush()
         time.sleep(1)
         
 
